@@ -1,0 +1,106 @@
+[
+  {
+    "name": "A",
+    "parent": "root"
+  },
+  {
+    "name": "Y",
+    "parent": "U"
+  },
+  {
+    "name": "B",
+    "parent": "A"
+  },
+  {
+    "name": "C",
+    "parent": "B"
+  },
+  {
+    "name": "D",
+    "parent": "C"
+  },
+  {
+    "name": "E",
+    "parent": "C"
+  },
+  {
+    "name": "F",
+    "parent": "C"
+  },
+  {
+    "name": "G",
+    "parent": "B"
+  },
+  {
+    "name": "H",
+    "parent": "G"
+  },
+  {
+    "name": "I",
+    "parent": "H"
+  },
+  {
+    "name": "J",
+    "parent": "G"
+  },
+  {
+    "name": "K",
+    "parent": "B"
+  },
+  {
+    "name": "Q",
+    "parent": "A"
+  },
+  {
+    "name": "L",
+    "parent": "K"
+  },
+  {
+    "name": "N",
+    "parent": "K"
+  },
+  {
+    "name": "M",
+    "parent": "L"
+  },
+  {
+    "name": "O",
+    "parent": "N"
+  },
+  {
+    "name": "P",
+    "parent": "O"
+  },
+  {
+    "name": "R",
+    "parent": "Q"
+  },
+  {
+    "name": "S",
+    "parent": "Q"
+  },
+  {
+    "name": "T",
+    "parent": "Q"
+  },
+  {
+    "name": "U",
+    "parent": "R"
+  },
+  {
+    "name": "V",
+    "parent": "S"
+  },
+  {
+    "name": "W",
+    "parent": "T"
+  },
+  {
+    "name": "Z",
+    "parent": "T"
+  },
+  {
+    "name": "X",
+    "parent": "U"
+  }
+]
