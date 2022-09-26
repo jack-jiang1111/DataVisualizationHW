@@ -33,7 +33,6 @@ loadData().then((loadedData) => {
 
   globalApplicationState.worldMap = worldMap;
     globalApplicationState.lineChart = lineChart;
-    Map = new MapVis(globalApplicationState);
     document.getElementById("clear-button").onclick = function () { ClearButton(); };
     legend = d3.select('#legend')
         .append('rect')
@@ -48,4 +47,8 @@ function ClearButton() {
     while (globalApplicationState.selectedLocations.length > 0) {
         globalApplicationState.selectedLocations.pop();
     }
+    let locations = ["OWID_OCE", "OWID_AFR", "OWID_ASI", "OWID_EUR", "OWID_NAM", "OWID_SAM"]
+    globalApplicationState.lineChart.updateSelectedCountries(locations);
+
+    document.querySelectorAll('#countries > .country.selected').forEach((b) => b.className.baseVal = 'countries country');
 }

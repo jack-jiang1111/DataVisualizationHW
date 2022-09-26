@@ -18,10 +18,10 @@ class MapVis {
     let path = d3.geoPath().projection(projection);
     // Define a  color map
     let colorScale = d3.scaleSequential(d3.interpolateReds).domain([0, 1])
-      let dataLookup = {};
+    let dataLookup = {};
 
     
-
+    let maxCase = 0
     covidData.forEach(function (stateRow) {
         // if the float is too small, then just return 0
         if (isNaN(parseFloat(stateRow.total_cases_per_million))) {
@@ -33,11 +33,28 @@ class MapVis {
             }    
         } 
     });
-
+    
     geoJSON.features.forEach(function (feature) {
         feature.properties.value = dataLookup[feature.id];
+        if (feature.properties.value>maxCase){
+            maxCase = feature.properties.value
+        }
     });
+    // add legend text
+    d3.select('#map')
+            .append('text')
+            .text('0')
+            .attr('x', 0)
+            .attr('y', 470);
+
+    d3.select('#map')
+    .append('text')
+    .text(d3.format(".2s")(maxCase))
+    .attr('x', 120)
+    .attr('y', 470);
     
+
+    // main path
     d3.select("#countries").selectAll("path")
         .data(geoJSON.features)
         .join("path")
@@ -48,13 +65,24 @@ class MapVis {
                 return colorScale(0)
             }
             else {
-                return colorScale(d.properties.value/660000.0);
+                return colorScale(d.properties.value/maxCase);
             }
         })
         .on('click', (d, data) =>{
+            // change selected class
+            var country = d.target;
+            if (country.className.baseVal == 'countries country'){
+                country.className.baseVal = 'countries country selected'
+            }
+            else{
+                country.className.baseVal = 'countries country'
+            }
+            
+            // update array and call linechart method
             this.updateSelectedCountries(data);
             globalApplicationState.lineChart.updateSelectedCountries(globalApplicationState.selectedLocations);
       })
+
     // TODO: no countries outlines? 
     // outline and geo graticule 
     let graticule = d3.geoGraticule();
@@ -75,6 +103,13 @@ class MapVis {
         if (!globalApplicationState.selectedLocations.includes(country.id)) {
             globalApplicationState.selectedLocations.push(country.id);
             console.log(this.globalApplicationState.selectedLocations)
+        }
+        else{
+            for( var i = 0; i < globalApplicationState.selectedLocations.length; i++){ 
+                if ( globalApplicationState.selectedLocations[i] === country.id) { 
+                    globalApplicationState.selectedLocations.splice(i, 1); 
+                }
+            }
         }  
     }
 }
