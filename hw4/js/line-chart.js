@@ -8,10 +8,7 @@ class LineChart {
         // Set some class level variables
         let locations = ["OWID_OCE", "OWID_AFR", "OWID_ASI", "OWID_EUR", "OWID_NAM", "OWID_SAM"]
         this.lineChart = d3.select('#line-chart')
-
         this.padding = { left: 80, bottom: 150, right: 50 }
-        
-
         
         // x axis text
         this.lineChart
@@ -41,7 +38,9 @@ class LineChart {
         let dataLookup = [];
         let format = d3.timeParse("%Y-%m-%d");
 
+        // data preprocessing
         covidData.forEach(function (stateRow) {
+            // make a copt so we don't change the orginal covid data
             let copiedRow = JSON.parse(JSON.stringify(stateRow));
             if (locations.includes(copiedRow.iso_code)) {
                 if (isNaN(parseFloat(copiedRow.total_cases_per_million))) {
@@ -57,6 +56,7 @@ class LineChart {
 
         let groupedLocationData = d3.group(dataLookup, d => d.iso_code)
         this.lineColorScale = d3.scaleOrdinal(d3.schemeTableau10).domain(groupedLocationData.keys());
+
         // Add x axis --> it is a date format
         const xAxis = d3.scaleTime()
             .domain(d3.extent(dataLookup.map((row) => row.date)))
@@ -68,6 +68,7 @@ class LineChart {
             .attr('transform', `translate(0, ${600 - this.padding.bottom})`)
             .call(d3.axisBottom(xAxis).tickFormat(d3.timeFormat("%b %Y")))
 
+        // y axis, linear float number
         const yAxis = d3.scaleLinear()
             .domain([0, Math.max(...dataLookup.map((row) => row.total_cases_per_million))])
             .range([600 - this.padding.bottom, 10])

@@ -16,12 +16,13 @@ class MapVis {
 
     // This converts the projected lat/lon coordinates into an SVG path string
     let path = d3.geoPath().projection(projection);
+
     // Define a  color map
     let colorScale = d3.scaleSequential(d3.interpolateReds).domain([0, 1])
     let dataLookup = {};
-
-    
     let maxCase = 0
+
+    // data processing
     covidData.forEach(function (stateRow) {
         // if the float is too small, then just return 0
         if (isNaN(parseFloat(stateRow.total_cases_per_million))) {
@@ -40,6 +41,7 @@ class MapVis {
             maxCase = feature.properties.value
         }
     });
+
     // add legend text
     d3.select('#map')
             .append('text')
@@ -48,13 +50,13 @@ class MapVis {
             .attr('y', 470);
 
     d3.select('#map')
-    .append('text')
-    .text(d3.format(".2s")(maxCase))
-    .attr('x', 120)
-    .attr('y', 470);
+        .append('text')
+        .text(d3.format(".2s")(maxCase))
+        .attr('x', 120)
+        .attr('y', 470);
     
 
-    // main path
+    // main path drawing
     d3.select("#countries").selectAll("path")
         .data(geoJSON.features)
         .join("path")
@@ -83,7 +85,6 @@ class MapVis {
             globalApplicationState.lineChart.updateSelectedCountries(globalApplicationState.selectedLocations);
       })
 
-    // TODO: no countries outlines? 
     // outline and geo graticule 
     let graticule = d3.geoGraticule();
     d3.select('#graticules')
@@ -100,6 +101,7 @@ class MapVis {
   }
 
     updateSelectedCountries(country) {
+        // update global select array
         if (!globalApplicationState.selectedLocations.includes(country.id)) {
             globalApplicationState.selectedLocations.push(country.id);
             console.log(this.globalApplicationState.selectedLocations)
