@@ -41,6 +41,10 @@ class Table {
             .domain([-100, 100])
             .range([0, this.vizWidth]);
 
+        // Setup data strutures for the following methods
+        this.formatData = []
+        this.tableData.forEach(element => { this.formatData.push(this.rowToCellDataTransform(element)) })
+
         this.attachSortHandlers();
         this.drawLegend();
     }
@@ -212,23 +216,56 @@ class Table {
         
 
     }
-
+    transformCoordinate(x) {
+        let width = 300;
+        //console.log((x / 75 + 1) / 2 * width);
+        return (x / 75 + 1) / 2 * width;
+    }
     addRectangles(containerSelect) {
-        ////////////
-        // PART 4 // 
-        ////////////
-        /**
-         * add rectangles for the bar charts
-         */
 
-         containerSelect.append("rectangle") 
-         .data(this.tableData)
-         .join("rectangle")
-         .attr("class","biden")
-         .attr("x",0)
-         .attr("y",0)
-         .attr("width",(d, i) => { {console.log(d) ;return d; } })
-         .attr("height",50)
+        let height = 25;
+        // left bars
+        containerSelect.append("rect")
+            //.data(this.formatData)
+            .join("rect")
+            .attr("class", function (d) {
+
+                if (d.value.marginLow < 0) {
+                    return "biden"
+                }
+                else {
+                    return "none"
+                }
+            })
+            .attr("x", d => this.transformCoordinate(d.value.marginLow))
+            .attr("y", this.vizHeight/2-height/2)
+            .attr("width", (d, i) => {
+                if (d.value.marginLow < 0) {
+                    if (d.value.marginHigh > 0) {
+                        // if cross the center, just stop at the center
+                        return this.vizWidth / 2 - this.transformCoordinate(d.value.marginLow);
+                    }
+                    else {
+                        return this.transformCoordinate(d.value.marginHigh - d.value.marginLow);
+                    }
+                }
+            })
+            .attr("height", height)
+        
+        // right bars
+        //containerSelect.append("rectangle")
+        //    .data(this.formatData)
+        //    .join("rectangle")
+        //    .attr("class", "biden")
+        //    .attr("x", 0)
+        //    .attr("y", 0)
+        //    .attr("width", (d, i) => {
+        //        //if (d.type != "iz") {
+        //        console.log(d[1].value);
+        //        return d[1].value.margin;
+        //        //}
+        //    })
+        //    .attr("height", 50)
        
     }
 
