@@ -122,6 +122,7 @@ header {
     display: none !important;
 }
 
+
 tr:hover .margin-bar {
     opacity: 0.9;
 }
