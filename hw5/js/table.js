@@ -41,9 +41,6 @@ class Table {
             .domain([-100, 100])
             .range([0, this.vizWidth]);
 
-        // Setup data strutures for the following methods
-        this.formatData = []
-        this.tableData.forEach(element => { this.formatData.push(this.rowToCellDataTransform(element)) })
 
         this.attachSortHandlers();
         this.drawLegend();
@@ -62,7 +59,7 @@ class Table {
             .attr("width", widths)
             .attr("height", heights);
         let textData = ["+75","+50","+25","","+25","+50","+75"]
-        let gap = 40;
+        let gap = 37.5;
         legend.selectAll("text").append("text")
             .data(textData)
             .join("text")
@@ -106,16 +103,6 @@ class Table {
             .attr('class', d => d.class)
             .text((d, i) => { if (d.type =="text") { return d.value; } });
 
-
-         
-        ////////////
-        // PART 1 // 
-        ////////////
-        /**
-         * with the forecastSelection you need to set the text based on the dat value as long as the type is 'text'
-         */
-
-
         let vizSelection = forecastSelection.filter(d => d.type === 'viz');
 
         let svgSelect = vizSelection.selectAll('svg')
@@ -129,7 +116,7 @@ class Table {
             .join('g');
 
         this.addGridlines(grouperSelect.filter((d,i) => i === 0), [-75, -50, -25, 0, 25, 50, 75]);
-        this.addRectangles(grouperSelect.filter((d,i) => i === 1));
+        this.addRectangles((grouperSelect.filter((d,i) =>i = 1)).filter((d,i)=>d.isForecast));
         this.addCircles(grouperSelect.filter((d,i) => i === 2));
     }
 
@@ -188,8 +175,58 @@ class Table {
         /**
          * update the column headers based on the sort state
          */
+        
+        let state = this.headerData.find(e=>e.key==="state")
+        let margin = this.headerData.find(e=>e.key==="mean_netpartymargin")
+        let win = this.headerData.find(e=>e.key==="winner_Rparty")
 
-     
+        let header = d3.selectAll(".sortable")._groups[0]
+
+        let stateElement = header[0];
+        let marginElement = header[1];
+        let winElement = header[2];
+        
+        if(state.sorted){
+            stateElement.classList.add("sorting");
+            
+            marginElement.classList.remove("sorting");
+            winElement.classList.remove("sorting")
+            if(state.ascending){
+                stateElement.querySelector("i").className = "fas fa-sort-up"
+            }
+            else{
+                stateElement.querySelector("i").className = "fas fa-sort-down"
+            }
+            marginElement.querySelector("i").className = "fas no-display"
+            winElement.querySelector("i").className = "fas no-display"
+        }
+        else if(margin.sorted){
+            marginElement.classList.add("sorting");
+            stateElement.classList.remove("sorting");
+            winElement.classList.remove("sorting")
+            if(margin.ascending){
+                marginElement.querySelector("i").className = "fas fa-sort-up"
+            }
+            else{
+                marginElement.querySelector("i").className = "fas fa-sort-down"
+            }
+            stateElement.querySelector("i").className = "fas no-display"
+            winElement.querySelector("i").className = "fas no-display"
+        }
+        else if(win.sorted){
+            winElement.classList.add("sorting")
+            marginElement.classList.remove("sorting");
+            stateElement.classList.remove("sorting");
+            if(win.ascending){
+                winElement.querySelector("i").className = "fas fa-sort-up"
+            }
+            else{
+                winElement.querySelector("i").className = "fas fa-sort-down"
+            }
+            marginElement.querySelector("i").className = "fas no-display"
+            stateElement.querySelector("i").className = "fas no-display"
+        }
+        
     }
 
     addGridlines(containerSelect, ticks) {
@@ -199,45 +236,35 @@ class Table {
         /**
          * add gridlines to the vizualization
          */
-        let gap = 40;
-        let widths = 300;
-         containerSelect.append("line") 
+        let gap = 37.5;
+        containerSelect.selectAll("line").append("line")
          .data(ticks) 
          .join("line")
          .attr("class",function(d,i){
             if(i!=3){return "grid-lines"}
             else{return "grid-lines-center"}}
             )
-         .attr("x1",(d,i)=>{return widths/2-3*gap+i*gap})
+         .attr("x1",(d,i)=>{return this.vizWidth/2-3*gap+i*gap})
          .attr("y1", 0)
-         .attr("x2", (d,i)=>{return widths/2-3*gap+i*gap})
-         .attr("y2", 100)
+         .attr("x2", (d,i)=>{return this.vizWidth/2-3*gap+i*gap})
+         .attr("y2", this.vizHeight)
          
         
 
     }
     transformCoordinate(x) {
         let width = 300;
-        //console.log((x / 75 + 1) / 2 * width);
-        return (x / 75 + 1) / 2 * width;
+        return (x / 100 + 1) / 2 * width;
     }
     addRectangles(containerSelect) {
-
         let height = 25;
+        let opacity = 0.3;
+
         // left bars
         containerSelect.append("rect")
-            //.data(this.formatData)
             .join("rect")
-            .attr("class", function (d) {
-
-                if (d.value.marginLow < 0) {
-                    return "biden"
-                }
-                else {
-                    return "none"
-                }
-            })
-            .attr("x", d => this.transformCoordinate(d.value.marginLow))
+            .attr("class",  "biden")
+            .attr("x", d => this.transformCoordinate(d.value.marginLow) )
             .attr("y", this.vizHeight/2-height/2)
             .attr("width", (d, i) => {
                 if (d.value.marginLow < 0) {
@@ -246,26 +273,44 @@ class Table {
                         return this.vizWidth / 2 - this.transformCoordinate(d.value.marginLow);
                     }
                     else {
-                        return this.transformCoordinate(d.value.marginHigh - d.value.marginLow);
+                        // if not cross the center, just draw the full bar
+                        return this.transformCoordinate(d.value.marginHigh)-this.transformCoordinate(d.value.marginLow);
                     }
                 }
             })
             .attr("height", height)
+            .style("opacity",opacity)
+            
         
         // right bars
-        //containerSelect.append("rectangle")
-        //    .data(this.formatData)
-        //    .join("rectangle")
-        //    .attr("class", "biden")
-        //    .attr("x", 0)
-        //    .attr("y", 0)
-        //    .attr("width", (d, i) => {
-        //        //if (d.type != "iz") {
-        //        console.log(d[1].value);
-        //        return d[1].value.margin;
-        //        //}
-        //    })
-        //    .attr("height", 50)
+        containerSelect.append("rect")
+            //.data(this.formatData)
+            .join("rect")
+            .attr("class",  "trump")
+            .attr("x", d => {
+                if (d.value.marginLow > 0) {
+                    // cross the center, just use margin low
+                    return this.transformCoordinate(d.value.marginLow);
+                }
+                else {
+                    // if not cross the center, just draw the full bar
+                    return this.vizWidth/2;
+                }
+            })
+            .attr("y", this.vizHeight/2-height/2)
+            .attr("width", (d, i) => {
+                if (d.value.marginHigh > 0) {
+                if (d.value.marginLow > 0) {
+                    // cross the center, just use margin low
+                    return this.transformCoordinate(d.value.marginHigh)-this.transformCoordinate(d.value.marginLow);
+                }
+                else {
+                    // if not cross the center, just draw the full bar
+                    return this.transformCoordinate(d.value.marginHigh) - this.vizWidth/2;
+                }}
+            })
+            .attr("height", height)
+            .style("opacity",opacity)
        
     }
 
@@ -276,19 +321,102 @@ class Table {
         /**
          * add circles to the vizualizations
          */
-
+        containerSelect.append("circle")
+            //.data(this.formatData)
+            .join("circle")
+            .attr("class", function (d) {
+                if (d.value.margin < 0) {
+                    return "biden"
+                }
+                else {
+                    return "trump"
+                }
+            })
+            .attr("cx", d => this.transformCoordinate(d.value.margin))
+            .attr("cy", this.vizHeight/2)
+            .attr("r", d=> d.isForecast ?5:4)
+            .style("stroke","black")
       
     }
 
     attachSortHandlers() 
     {
-        ////////////
-        // PART 6 // 
-        ////////////
-        /**
-         * Attach click handlers to all the th elements inside the columnHeaders row.
-         * The handler should sort based on that column and alternate between ascending/descending.
-         */
+        d3.select("#columnHeaders").on('click',(d,data)=>{
+            this.collapseAll()
+            let state = this.headerData.find(e=>e.key==="state")
+            let margin = this.headerData.find(e=>e.key==="mean_netpartymargin")
+            let win = this.headerData.find(e=>e.key==="winner_Rparty")
+            if(d.target.textContent == "State "){
+                
+                if(!state.sorted){
+                    this.tableData.sort((a,b)=>(a.state>b.state)?1:-1)
+                    state.ascending = true
+                    state.sorted = true
+                    margin.sorted = false
+                    margin.ascending = false
+                    win.sorted = false
+                    win.ascending = false
+                }
+                else{
+                    if(state.ascending){
+                        this.tableData.sort((a,b)=>(a.state>b.state)?-1:1)
+                        state.ascending = false
+                    }
+                    else{
+                        this.tableData.sort((a,b)=>(a.state>b.state)?1:-1)
+                        state.ascending = true
+                    }
+                }
+            }
+            else if(d.target.textContent == "Margin of Victory "){
+                
+                if(!margin.sorted){
+                    this.tableData.sort((a,b)=>(Math.abs(a.mean_netpartymargin)>Math.abs(b.mean_netpartymargin))?1:-1)
+                    margin.ascending = true
+                    margin.sorted = true
+                    state.sorted = false
+                    state.ascending = false
+                    win.sorted = false
+                    win.ascending = false
+                }
+                else{
+                    if(margin.ascending){
+                        this.tableData.sort((a,b)=>(Math.abs(a.mean_netpartymargin)>Math.abs(b.mean_netpartymargin))?-1:1)
+                        margin.ascending = false
+                    }
+                    else{
+                        this.tableData.sort((a,b)=>(Math.abs(a.mean_netpartymargin)>Math.abs(b.mean_netpartymargin))?1:-1)
+                        margin.ascending = true
+                    }
+                }
+                
+            }
+            else if(d.target.textContent == "Wins "){
+                
+                if(!win.sorted){
+                    this.tableData.sort((a,b)=>(Math.max(a.winner_Rparty, a.winner_Dparty)>Math.max(b.winner_Rparty, b.winner_Dparty))?-1:1)
+                    win.ascending = true
+                    win.sorted = true
+                    margin.ascending = false
+                    margin.sorted = false
+                    state.sorted = false
+                    state.ascending = false
+                }
+                else{
+                    if(win.ascending){
+                        this.tableData.sort((a,b)=>(Math.max(a.winner_Rparty, a.winner_Dparty)>Math.max(b.winner_Rparty, b.winner_Dparty))?1:-1)
+                        win.ascending = false
+                    }
+                    else{
+                        this.tableData.sort((a,b)=>(Math.max(a.winner_Rparty, a.winner_Dparty)>Math.max(b.winner_Rparty, b.winner_Dparty))?-1:1)
+                        win.ascending = true
+                    }
+                }
+            }
+            this.drawTable();
+        })
+
+
 
         
     }
@@ -303,6 +431,20 @@ class Table {
         /**
          * Update table data with the poll data and redraw the table.
          */
+
+        let state = rowData.state
+
+        // add poll data
+        if(this.tableData[index+1].isForecast){
+            this.tableData.splice.apply(this.tableData,[index+1,0].concat(this.pollData.get(state)))
+        }
+        else{
+            // remove poll data
+            let rowsToRemove = (this.pollData.get(state)).length
+            this.tableData.splice(index+1, rowsToRemove); 
+        }
+        
+        this.drawTable();
      
     }
 
