@@ -65,6 +65,9 @@
 
 #chart{
     margin: auto;
+    height: 100%;
+    width: 100%;
+    display: flex;
 }
 
 #axis{
@@ -82,4 +85,63 @@
 #NgramTable{
   position: relative;
   vertical-align: left;
+  left: 100px;
+}
+
+
+table {
+  border-collapse: collapse;
+  font: 14px sans-serif;
+}
+
+
+
+th {
+  min-width: 50px;
+  vertical-align: 5px;
+}
+
+
+td:first-of-type {
+  text-align: left;
+}
+
+td {
+  text-align: center;
+}
+
+
+.sorting {
+  background: black;
+  color: white;
+}
+
+.sortable {
+  user-select: none;
+  border-radius: 5px;
+  cursor: pointer;
+  
+}
+
+
+td {
+  text-anchor: middle;
+  color:black;
+}
+
+#predictionTable tbody tr {
+  cursor: pointer;
+}
+
+tbody tr:hover {
+  background-color: #efefef;
+}
+
+.label{
+  text-anchor: middle;
+}
+
+
+.no-display {
+  display: none !important;
 }

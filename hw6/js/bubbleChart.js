@@ -11,7 +11,6 @@ class Bubble {
      */
     constructor(data) {
         this.data = data
-        //console.log(data)
         this.vizWidth = 300;
         this.vizHeight = 30;
         this.smallVizHeight = 20;

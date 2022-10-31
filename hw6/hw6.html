@@ -46,15 +46,16 @@
             <table id="NgramTable">
                 <thead>
                 <tr id="columnHeaders">
-                    <th class="sortable"><b>Phrase</b> <i class="fas no-display"></i></th>
-                    <th class="sortable"><b>Frequency</b> <i class="fas no-display"></i></th>
-                    <th class="sortable"><b>Percentages</b> <i class="fas no-display"></i></th>
-                    <th class="sortable"><b>Total</b> <i class="fas no-display"></i></th>
-                </tr>
-                <tr>
-                    <td></td>
-                    <td><svg id="TableAxis"></svg></td>
-                    <td></td>
+                    <th class="sortable" ><b>Phrase</b> </th>
+                    <th class="sortable" >
+                        <b>Frequency</b> 
+                        <td><svg id="FrequencyAxis" height = 30></svg></td>
+                    </th>
+                    <th class="sortable" >
+                        <b>Percentages</b> 
+                        <td><svg id="PercentagesAxis" height = 30></svg></td>
+                    </th>
+                    <th class="sortable" ><b>Total</b></th>
                 </tr>
                 </thead>
                 <tbody id="NgramTableBody">
@@ -64,7 +65,9 @@
         </div>
     </div>
     <script src="js/bubbleChart.js"></script>
+    <script src="js/NgramTable.js"></script>
     <script src="js/script.js"></script>
+    
 </body>
 
 </html>
