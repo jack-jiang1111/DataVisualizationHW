@@ -84,20 +84,23 @@
 
 #NgramTable{
   position: relative;
-  vertical-align: left;
-  left: 100px;
+  left:50px;
+
 }
 
+#NgramTable thead {
+    position: relative;
+    background-color: steelblue;
+}
 
 table {
   border-collapse: collapse;
-  font: 14px sans-serif;
+  font: 12px sans-serif;
 }
 
 
 
 th {
-  min-width: 50px;
   vertical-align: 5px;
 }
 
@@ -107,9 +110,11 @@ td:first-of-type {
 }
 
 td {
-  text-align: center;
+    text-align: center;
 }
-
+td:last-of-type {
+    text-align: center;
+}
 
 .sorting {
   background: black;
@@ -117,16 +122,17 @@ td {
 }
 
 .sortable {
-  user-select: none;
-  border-radius: 5px;
-  cursor: pointer;
-  
+    user-select: none;
+    cursor: pointer;
+    background: #9edbf0;
 }
 
 
 td {
-  text-anchor: middle;
-  color:black;
+    text-anchor: middle;
+    color: black;
+    overflow: hidden;
+    white-space: nowrap;
 }
 
 #predictionTable tbody tr {

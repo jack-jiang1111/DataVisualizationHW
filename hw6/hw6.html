@@ -43,23 +43,22 @@
                 <g id="toolTip"></g>
             </svg>
 
-            <table id="NgramTable">
+            <table id="NgramTable" style="width:40%">
                 <thead>
-                <tr id="columnHeaders">
-                    <th class="sortable" ><b>Phrase</b> </th>
-                    <th class="sortable" >
-                        <b>Frequency</b> 
-                        <td><svg id="FrequencyAxis" height = 30></svg></td>
-                    </th>
-                    <th class="sortable" >
-                        <b>Percentages</b> 
-                        <td><svg id="PercentagesAxis" height = 30></svg></td>
-                    </th>
-                    <th class="sortable" ><b>Total</b></th>
-                </tr>
+                    <tr id="columnHeaders" >
+                        <th class="sortable" style="width:30%"><b>Phrase</b> </th>
+                        <th class="sortable" style="width:30%"><b>Frequency</b></th>
+                        <th class="sortable" style="width:30%"><b>Percentages</b></th>
+                        <th class="sortable" style="width:10%"><b>Total</b></th>
+                    </tr>
+                    <tr>
+                        <td class="sortable"></td>
+                        <td class="sortable"><svg id="FrequencyAxis" height="50"></svg></td>
+                        <td class="sortable"><svg id="PercentagesAxis" height="50"></svg></td>
+                        <td class="sortable"></td>
+                    </tr>
                 </thead>
                 <tbody id="NgramTableBody">
-    
                 </tbody>
             </table>
         </div>

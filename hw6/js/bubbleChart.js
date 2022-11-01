@@ -4,7 +4,9 @@ const category = {
     "crime/justice":2,    
     "education":3,
     "health care":4,
-    "mental health/substance abuse":5}
+    "mental health/substance abuse": 5
+}
+
 class Bubble {
     /**
      * Creates a bubble chart Object

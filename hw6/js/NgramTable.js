@@ -1,4 +1,14 @@
 /** Class implementing the table. */
+
+let colorMap = {
+    "economy/fiscal issues": "#84bca8",
+    "energy/environment": "#e2916c",
+    "crime/justice": "#928cc5",
+    "education": "#d487ba",
+    "health care": "#b1d469",
+    "mental health/substance abuse": "#edd755"
+}
+
 class Table {
     /**
      * Creates a Table Object
@@ -6,21 +16,38 @@ class Table {
     constructor(data) {
         this.tableData = data;
         this.vizWidth = 300;
-        this.vizHeight = 30;
-        this.smallVizHeight = 20;
+        this.vizHeight = 20;
         
         this.scaleX = d3.scaleLinear()
             .domain([-100, 100])
             .range([0, this.vizWidth]);
 
+        this.headerData = [
+            {
+                sorted: false,
+                ascending: false,
+                key: 'Phrase'
+            },
+            {
+                sorted: false,
+                ascending: false,
+                key: 'Frequency',
+            },
+            {
+                sorted: false,
+                ascending: false,
+                key: 'Percentages',
+            },
+            {
+                sorted: false,
+                ascending: false,
+                key: 'total',
+            },
+        ]
 
-        //this.attachSortHandlers();
-        //this.drawLegend();
-        // Todo:
-        // set legend
-        // get bar working
         this.drawTable()
         this.drawLegend()
+        this.attachSortHandlers() 
     }
 
     drawLegend() {
@@ -30,48 +57,81 @@ class Table {
         /**
          * Draw the legend for the bar chart.
          */
-        let widths = 100;
-        let heights = 25;
+        let leftfrequency = 50
+        let widths = 300;
         let legend = d3.select("#FrequencyAxis")
 
         let textData = ["0.0","0.5","1.0"]
-
-        let gap = 37.5;
-        legend.append("text")
+        legend.selectAll("text")
             .data(textData)
+            .join("text")
             .attr("x", (d, i) => {
-                console.log(d,i)
-                return widths/2-3*gap+i*gap-15;
+                //console.log(d, i)
+                return widths/3*i + leftfrequency;
             })
-            .attr("y", 15)
-            .text((d)=>d)
-        legend.append("line")
-            .data(textData) 
-            .attr("x1",(d,i)=>widths/3*i)
-            .attr("y1", 0)
-            .attr("x2",(d,i)=>widths/3*i)
+            .attr("y", 25)
+            .text((d) => d)
+        legend.selectAll("line")
+            .data(textData)
+            .join("line")
+            .attr("x1", (d, i) => widths / 3 * i + leftfrequency)
+            .attr("y1", 35)
+            .attr("x2", (d, i) => widths / 3 * i + leftfrequency)
             .attr("y2", 100)
-    }
-    
+            .style("stroke", "black")
+            .style("stroke-width", 3)
+
+        let legendPercent = d3.select("#PercentagesAxis")
+        let percentData = ["100","50","0","50","100"]
+        legendPercent.selectAll("text")
+            .data(percentData)
+            .join("text")
+            .attr("x", (d, i) => {
+                return widths / 5 * i + leftfrequency-20;
+            })
+            .attr("y", 25)
+            .text((d) => d)
+        legendPercent.selectAll("line")
+            .data(percentData)
+            .join("line")
+            .attr("x1", (d, i) => widths / 5 * i + leftfrequency-20)
+            .attr("y1", 35)
+            .attr("x2", (d, i) => widths / 5 * i + leftfrequency-20)
+            .attr("y2", 100)
+            .style("stroke", "black")
+            .style("stroke-width", 3)
+    }  
     drawTable() {
-        console.log(this.tableData)
+        this.vizHeight = 25
+        this.vizWidth = 300
         let rowSelection = d3.select('#NgramTableBody')
             .selectAll('tr')
             .data(this.tableData)
             .join('tr')
 
-        rowSelection.selectAll('td')
+        let tdSelection = rowSelection.selectAll('td')
             .data(this.rowToCellDataTransform)
             .join('td') 
-            .text((d, i) =>  {if (d.type =="text") { return d.value; } });
-        //this.addGridlines();
-        //this.addRectangles();
+            .text((d, i) => { if (d.type == "text") { return d.value; } });
+
+        let visSelection = tdSelection.filter(d=>d.type==='bar')
+        let svgSelect = visSelection.selectAll('svg')
+            .data(d => [d])
+            .join('svg')
+            .attr('width', this.vizWidth)
+            .attr('height', this.vizHeight);
+        let groupSelection = svgSelect.selectAll('g')
+            .data(d => [d, d])
+            .join('g')
+       
+        this.addRectangles(groupSelection);
     }
     rowToCellDataTransform(d) {
         let speechInfo = {
             type: 'bar',
             d_speech: d.percent_of_d_speeches,
-            r_speech: d.percent_of_r_speeches
+            r_speech: d.percent_of_r_speeches,
+            bartype: 'speech'
         };
         let phrase = {
             type: 'text',
@@ -79,7 +139,9 @@ class Table {
         }
         let frequency = {
             type: 'bar',
-            value: d.total/50
+            value: d.total / 50,
+            category: d.category,
+            bartype: 'frequency'
         }
         let total = {
             type: 'text',
@@ -87,166 +149,156 @@ class Table {
         }
         let dataList = [phrase, frequency,speechInfo, total];
         return dataList;
-    }
-
-    addGridlines(containerSelect, ticks) {
-        ////////////
-        // PART 3 // 
-        ////////////
-        /**
-         * add gridlines to the vizualization
-         */
-        let gap = 37.5;
-        containerSelect.selectAll("line").append("line")
-         .data(ticks) 
-         .join("line")
-         .attr("class",function(d,i){
-            if(i!=3){return "grid-lines"}
-            else{return "grid-lines-center"}}
-            )
-         .attr("x1",(d,i)=>{return this.vizWidth/2-3*gap+i*gap})
-         .attr("y1", 0)
-         .attr("x2", (d,i)=>{return this.vizWidth/2-3*gap+i*gap})
-         .attr("y2", this.vizHeight)
-         
-        
-
-    }
-    transformCoordinate(x) {
-        let width = 300;
-        return (x / 100 + 1) / 2 * width;
-    }
+    } 
     addRectangles(containerSelect) {
         let height = 25;
-        let opacity = 0.3;
+        let frequency = containerSelect.filter((d, i) => d.bartype=='frequency') // frequency selection data
+        let percentage = containerSelect.filter((d, i) => d.bartype=='speech')// percentage selection data
 
-        // left bars
-        containerSelect.append("rect")
+        frequency.append("rect")
             .join("rect")
-            .attr("class",  "biden")
-            .attr("x", d => this.transformCoordinate(d.value.marginLow) )
-            .attr("y", this.vizHeight/2-height/2)
+            .attr("x", 50)
+            .attr("y", 5)
             .attr("width", (d, i) => {
-                if (d.value.marginLow < 0) {
-                    if (d.value.marginHigh > 0) {
-                        // if cross the center, just stop at the center
-                        return this.vizWidth / 2 - this.transformCoordinate(d.value.marginLow);
-                    }
-                    else {
-                        // if not cross the center, just draw the full bar
-                        return this.transformCoordinate(d.value.marginHigh)-this.transformCoordinate(d.value.marginLow);
-                    }
+                console.log(d)
+                return d.value*300
+                //return d.value
                 }
+            )
+            .attr("height", height)
+            //.style("opacity", opacity)
+            .style("fill", d => colorMap[d.category])
+
+        // right part repulica
+        percentage.append("rect")
+            .join("rect")
+            .attr("x", 150+5)
+            .attr("y", 5)
+            .attr("width", (d, i) => {
+                //console.log(d);
+                return 300 / 5 * d.r_speech / 100 + 50 - 20;
             })
             .attr("height", height)
-            .style("opacity",opacity)
-            
-        
-        // right bars
-        containerSelect.append("rect")
-            //.data(this.formatData)
+            .attr("fill", "firebrick")
+
+        // left side democra
+        percentage.append("rect")
             .join("rect")
-            .attr("class",  "trump")
-            .attr("x", d => {
-                if (d.value.marginLow > 0) {
-                    // cross the center, just use margin low
-                    return this.transformCoordinate(d.value.marginLow);
-                }
-                else {
-                    // if not cross the center, just draw the full bar
-                    return this.vizWidth/2;
-                }
-            })
-            .attr("y", this.vizHeight/2-height/2)
+            .attr("x", (d)=> 150 - 5 - (300 / 5 * d.d_speech / 100 + 50 - 20))
+            .attr("y", 5)
             .attr("width", (d, i) => {
-                if (d.value.marginHigh > 0) {
-                if (d.value.marginLow > 0) {
-                    // cross the center, just use margin low
-                    return this.transformCoordinate(d.value.marginHigh)-this.transformCoordinate(d.value.marginLow);
-                }
-                else {
-                    // if not cross the center, just draw the full bar
-                    return this.transformCoordinate(d.value.marginHigh) - this.vizWidth/2;
-                }}
+                //console.log(d);
+                return 300 / 5 * d.d_speech / 100 + 50 - 20;
             })
             .attr("height", height)
-            .style("opacity",opacity)
-       
+            .attr("fill", "steelblue")
     }
 
     attachSortHandlers() 
     {
         d3.select("#columnHeaders").on('click',(d,data)=>{
-            this.collapseAll()
-            let state = this.headerData.find(e=>e.key==="state")
-            let margin = this.headerData.find(e=>e.key==="mean_netpartymargin")
-            let win = this.headerData.find(e=>e.key==="winner_Rparty")
-            if(d.target.textContent == "State "){
-                
-                if(!state.sorted){
-                    this.tableData.sort((a,b)=>(a.state>b.state)?1:-1)
-                    state.ascending = true
-                    state.sorted = true
-                    margin.sorted = false
-                    margin.ascending = false
-                    win.sorted = false
-                    win.ascending = false
+            let phrase = this.headerData.find(e=>e.key==="Phrase")
+            let frequency = this.headerData.find(e => e.key ==="Frequency")
+            let percent = this.headerData.find(e => e.key === "Percentages")
+            let total = this.headerData.find(e => e.key === "total")
+            //Phrase Frequency Percentages Total
+            if (d.target.textContent == "Phrase") {
+
+                if (!phrase.sorted) {
+                    this.tableData.sort((a, b) => (a.phrase > b.phrase) ? 1 : -1)
+                    phrase.ascending = true
+                    phrase.sorted = true
+                    frequency.sorted = false
+                    frequency.ascending = false
+                    percent.sorted = false
+                    percent.ascending = false
+                    total.sorted = false
+                    total.ascending = false
                 }
-                else{
-                    if(state.ascending){
-                        this.tableData.sort((a,b)=>(a.state>b.state)?-1:1)
-                        state.ascending = false
+                else {
+                    if (phrase.ascending) {
+                        this.tableData.sort((a, b) => (a.phrase > b.phrase) ? -1 : 1)
+                        phrase.ascending = false
                     }
-                    else{
-                        this.tableData.sort((a,b)=>(a.state>b.state)?1:-1)
-                        state.ascending = true
+                    else {
+                        this.tableData.sort((a, b) => (a.phrase > b.phrase) ? 1 : -1)
+                        phrase.ascending = true
                     }
                 }
             }
-            else if(d.target.textContent == "Margin of Victory "){
-                
-                if(!margin.sorted){
-                    this.tableData.sort((a,b)=>(Math.abs(a.mean_netpartymargin)>Math.abs(b.mean_netpartymargin))?1:-1)
-                    margin.ascending = true
-                    margin.sorted = true
-                    state.sorted = false
-                    state.ascending = false
-                    win.sorted = false
-                    win.ascending = false
+            else if (d.target.textContent == "Frequency") {
+
+                if (!frequency.sorted) {
+                    this.tableData.sort((a, b) => (a.total > b.total ? 1 : -1))
+                    frequency.ascending = true
+                    frequency.sorted = true
+                    phrase.sorted = false
+                    phrase.ascending = false
+                    percent.sorted = false
+                    percent.ascending = false
+                    total.sorted = false
+                    total.ascending = false
                 }
-                else{
-                    if(margin.ascending){
-                        this.tableData.sort((a,b)=>(Math.abs(a.mean_netpartymargin)>Math.abs(b.mean_netpartymargin))?-1:1)
-                        margin.ascending = false
+                else {
+                    if (frequency.ascending) {
+                        this.tableData.sort((a, b) => (a.total > b.total ? 1 : -1))
+                        frequency.ascending = false
                     }
-                    else{
-                        this.tableData.sort((a,b)=>(Math.abs(a.mean_netpartymargin)>Math.abs(b.mean_netpartymargin))?1:-1)
-                        margin.ascending = true
+                    else {
+                        this.tableData.sort((a, b) => (a.total < b.total ? 1 : -1))
+                        frequency.ascending = true
                     }
                 }
-                
+
             }
-            else if(d.target.textContent == "Wins "){
-                
-                if(!win.sorted){
-                    this.tableData.sort((a,b)=>(Math.max(a.winner_Rparty, a.winner_Dparty)>Math.max(b.winner_Rparty, b.winner_Dparty))?-1:1)
-                    win.ascending = true
-                    win.sorted = true
-                    margin.ascending = false
-                    margin.sorted = false
-                    state.sorted = false
-                    state.ascending = false
+            else if (d.target.textContent == "Percentages") {
+
+                if (!percent.sorted) {
+                    this.tableData.sort((a, b) => (Math.max(parseFloat(a.percent_of_d_speeches), parseFloat(a.percent_of_r_speeches)) > Math.max(parseFloat(b.percent_of_d_speeches), parseFloat(b.percent_of_r_speeches))) ? -1 : 1)
+                    percent.ascending = true
+                    percent.sorted = true
+                    frequency.ascending = false
+                    frequency.sorted = false
+                    phrase.sorted = false
+                    phrase.ascending = false
                 }
-                else{
-                    if(win.ascending){
-                        this.tableData.sort((a,b)=>(Math.max(a.winner_Rparty, a.winner_Dparty)>Math.max(b.winner_Rparty, b.winner_Dparty))?1:-1)
-                        win.ascending = false
+                else {
+                    if (percent.ascending) {
+                        this.tableData.sort((a, b) => (Math.max(parseFloat(a.percent_of_d_speeches), parseFloat(a.percent_of_r_speeches)) > Math.max(parseFloat(b.percent_of_d_speeches), parseFloat(b.percent_of_r_speeches))) ? -1 : 1)
+                        percent.ascending = false
                     }
-                    else{
-                        this.tableData.sort((a,b)=>(Math.max(a.winner_Rparty, a.winner_Dparty)>Math.max(b.winner_Rparty, b.winner_Dparty))?-1:1)
-                        win.ascending = true
+                    else {
+                        this.tableData.sort((a, b) => (Math.max(parseFloat(a.percent_of_d_speeches), parseFloat(a.percent_of_r_speeches)) < Math.max(parseFloat(b.percent_of_d_speeches), parseFloat(b.percent_of_r_speeches))) ? -1 : 1)
+                        percent.ascending = true
                     }
                 }
+            }
+            else if (d.target.textContent == "Total") {
+
+                if (!total.sorted) {
+                    this.tableData.sort((a, b) => (parseInt(a.total) > parseInt(b.total)) ? 1 : -1)
+                    phrase.ascending = false
+                    phrase.sorted = false
+                    frequency.sorted = false
+                    frequency.ascending = false
+                    percent.sorted = false
+                    percent.ascending = false
+                    total.sorted = true
+                    total.ascending = true
+                }
+                else {
+                    if (total.ascending) {
+                        this.tableData.sort((a, b) => (parseInt(a.total) > parseInt(b.total)) ? -1 : 1)
+                        total.ascending = false
+                    }
+                    else {
+                        this.tableData.sort((a, b) => (parseInt(a.total) > parseInt(b.total)) ? 1 : -1)
+                        total.ascending = true
+                    }
+                }
+            }
+            else {
+                console.log(d.target.textContent)
             }
             this.drawTable();
         })
