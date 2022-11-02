@@ -259,6 +259,8 @@ class Table {
                     frequency.sorted = false
                     phrase.sorted = false
                     phrase.ascending = false
+                    total.sorted = false
+                    total.ascending = false
                 }
                 else {
                     if (percent.ascending) {

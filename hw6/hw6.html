@@ -22,29 +22,30 @@
     </div>
 
     <div class="view">
-        <div id = "header">
-            <svg id = "header-widgets" height = 100 width = 150>   
+        <div id="header">
+            <svg id="header-widgets" height=100 width=150>
             </svg>
             <label class="switch">
                 <input type="checkbox">
                 <span class="slider round"></span>
             </label>
-            <button class = "extreme">Show Extreme</button>
+            <button class="extreme">Show Extreme</button>
         </div>
-        
-        <div id = "chart">
-            <svg id="bubbleChart" height="1000" width="750" >
+
+        <div id="chart">
+            <svg id="bubbleChart" height="1000" width="750">
                 <g id="bubbles"></g>
                 <g id="linesAndAxis"></g>
                 <g id="middleLine"></g>
                 <g id="axis"></g>
                 <g id="category"></g>
                 <g id="toolTip"></g>
+                <g id="extreme"></g>
             </svg>
 
             <table id="NgramTable" style="width:40%">
                 <thead>
-                    <tr id="columnHeaders" >
+                    <tr id="columnHeaders">
                         <th class="sortable" style="width:30%"><b>Phrase</b> </th>
                         <th class="sortable" style="width:30%"><b>Frequency</b></th>
                         <th class="sortable" style="width:30%"><b>Percentages</b></th>
@@ -65,7 +66,7 @@
     <script src="js/bubbleChart.js"></script>
     <script src="js/NgramTable.js"></script>
     <script src="js/script.js"></script>
-    
+
 </body>
 
 </html>

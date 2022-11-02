@@ -258,8 +258,8 @@ class Bubble {
         d3.select("#toolTip").selectAll("rect").remove()
         d3.select("#toolTip").selectAll("text").remove()
         let renderData = [data.phrase.charAt(0).toUpperCase() + data.phrase.slice(1),
-            "R "+(data.position<0?"":"+") + data.position.toFixed(2)+"%",
-            "In "+Math.round(data.total*2)+"% of speeches"]
+        (data.position < 0 ? "D +" : "R +") + Math.abs(data.position.toFixed(2)) + "%",
+        "In " + Math.round(data.total * 2) + "% of speeches"]
 
         let xpos = 0;
         let ypos = 0;
@@ -296,5 +296,59 @@ class Bubble {
     }
     showExtreme(){
         console.log("show extreme!")
+        let sourceList = this.data.map(v => parseFloat(v.sourceX))
+        let max = sourceList.reduce((a, b) => Math.max(a, b), -Infinity);
+        let min = sourceList.reduce((a, b) => Math.min(a, b), Infinity);
+        //console.log(min, max)
+        let data = []
+        data.push(this.data.filter(d => (d.sourceX === min || d.sourceX===max)))
+        console.log(data)
+
+        let xgap = 30
+        let ygap = 30
+        d3.select("#extreme").selectAll("rect").remove()
+        d3.select("#extreme").selectAll("text").remove()
+        d3.select("#extreme").selectAll("line").remove()
+
+        let renderData = [
+            (data.position < 0 ? "Democratic speeches mention " : "Republican speeches mention "),
+            data.phrase.charAt(0).toUpperCase() + data.phrase.slice(1),
+            Math.abs(data.position.toFixed(2)) + "%"
+        ]
+
+        let xpos = 0;
+        let ypos = 0;
+        if (this.expanding) {
+            xpos = xScale(data.moveX)
+            ypos = xScale(data.moveY + 150)
+        }
+        else {
+            xpos = xScale(data.sourceX)
+            ypos = xScale(data.sourceY + 150)
+        }
+
+        d3.select("#extreme").append("rect")
+            .join("rect")
+            .attr("x", xpos + xgap)
+            .attr("y", ypos + ygap)
+            .attr("width", 150)
+            .attr("height", 80)
+            .style("fill", "white")
+            .style("opacity", 0.75)
+
+        let text = d3.select("#extreme").selectAll("text").data(renderData)
+        text.join("text")
+            .text(d => d)
+            .attr("x", (d, i) => {
+                if (xpos + xgap <= 580) {
+                    return xpos + xgap;
+                }
+                else {
+                    return xpos - xgap - 150;
+                }
+            })
+            .attr("y", (d, i) => {
+                return ypos + ygap * 1.5 + i * 25
+            })
     }
 }
