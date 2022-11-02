@@ -2,7 +2,7 @@
 .switch {
     position: relative;
     left: 10px;
-    top:-47px;
+    top:35px;
     display: inline-block;
     width: 30px;
     height: 20px;
@@ -88,11 +88,6 @@
 
 }
 
-#NgramTable thead {
-    position: relative;
-    background-color: steelblue;
-}
-
 table {
   border-collapse: collapse;
   font: 12px sans-serif;
@@ -107,13 +102,6 @@ th {
 
 td:first-of-type {
   text-align: left;
-}
-
-td {
-    text-align: center;
-}
-td:last-of-type {
-    text-align: center;
 }
 
 .sorting {
@@ -133,12 +121,12 @@ td {
     color: black;
     overflow: hidden;
     white-space: nowrap;
+    text-align: center;
 }
 
-#predictionTable tbody tr {
-  cursor: pointer;
+tr{
+  max-height: 25px;
 }
-
 tbody tr:hover {
   background-color: #efefef;
 }
@@ -150,4 +138,28 @@ tbody tr:hover {
 
 .no-display {
   display: none !important;
+}
+#header{
+    margin: auto;
+    height: 100%;
+    width: 100%;
+    display: flex;
+}
+.extreme{
+  position: relative;
+  left: 40px;
+  top:15px;
+  display: inline-block;
+
+  height:50px;
+  width: 100px;
+  fill: #ccc;
+  border-radius: 5px;
+  color: steelblue;
+  border: 2px solid steelblue; /* Green */
+  margin-top: 10px;
+}
+.extreme:hover {
+  background-color: steelblue;
+  color: white;
 }

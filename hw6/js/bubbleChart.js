@@ -210,18 +210,27 @@ class Bubble {
         .attr("x",0)
         .attr("y",50)
 
-        d3.select("#header-widgets")
-        .append()
-        
-        // add show extreme
-        d3.select("#header")
-        .append("rect")
-        .attr("x", 200 )
-        .attr("y", 20)
-        .attr("width", 100)
-        .attr("height", 50)
-        .style("fill","black")
-        .style("stroke","blue")
+        document.querySelector('.extreme').onclick=(event)=>{
+            this.showExtreme();}
+        // d3.select("#button")
+        // .append("rect")
+        // .attr("x", 50 )
+        // .attr("y", 25)
+        // .attr("width", 200)
+        // .attr("height", 40)
+        // .style("fill","white")
+        // .style("stroke","blue")
+
+        // d3.select("#button")
+        // .append("text")
+        // .attr("x",90)
+        // .attr("y",50)
+        // .text("Show Extreme")
+        // .style("stroke","blue")
+        // .on("click",(event,d)=>{
+        //     this.showExtreme()
+        // })
+
         let temp = null;
         d3.select(".switch")
         .on("click",(event, d)=>{
@@ -284,5 +293,8 @@ class Bubble {
         .attr("y",(d,i)=>{
             return ypos+ygap*1.5+i*25
         })
+    }
+    showExtreme(){
+        console.log("show extreme!")
     }
 }

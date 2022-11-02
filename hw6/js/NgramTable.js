@@ -17,11 +17,6 @@ class Table {
         this.tableData = data;
         this.vizWidth = 300;
         this.vizHeight = 20;
-        
-        this.scaleX = d3.scaleLinear()
-            .domain([-100, 100])
-            .range([0, this.vizWidth]);
-
         this.headerData = [
             {
                 sorted: false,
@@ -121,7 +116,7 @@ class Table {
             .attr('width', this.vizWidth)
             .attr('height', this.vizHeight);
         let groupSelection = svgSelect.selectAll('g')
-            .data(d => [d, d])
+            .data(d => [d])
             .join('g')
        
         this.addRectangles(groupSelection);
@@ -160,9 +155,10 @@ class Table {
             .attr("x", 50)
             .attr("y", 5)
             .attr("width", (d, i) => {
-                console.log(d)
-                return d.value*300
-                //return d.value
+                //console.log(d.value)
+                // width range 0-200
+                // frequency range: 0-1
+                return d.value*200
                 }
             )
             .attr("height", height)
@@ -172,11 +168,12 @@ class Table {
         // right part repulica
         percentage.append("rect")
             .join("rect")
-            .attr("x", 150+5)
+            .attr("x", 150+2)
             .attr("y", 5)
             .attr("width", (d, i) => {
-                //console.log(d);
-                return 300 / 5 * d.r_speech / 100 + 50 - 20;
+                //console.log(d.r_speech);
+                // width range: 0-120
+                return  d.r_speech/100*120;
             })
             .attr("height", height)
             .attr("fill", "firebrick")
@@ -184,11 +181,12 @@ class Table {
         // left side democra
         percentage.append("rect")
             .join("rect")
-            .attr("x", (d)=> 150 - 5 - (300 / 5 * d.d_speech / 100 + 50 - 20))
+            .attr("x", (d)=> 30+d.d_speech/100*120)
             .attr("y", 5)
             .attr("width", (d, i) => {
-                //console.log(d);
-                return 300 / 5 * d.d_speech / 100 + 50 - 20;
+                //  range: 30-150
+                //console.log(d.d_speech);
+                return Math.max(120-d.d_speech/100*120-2,0);
             })
             .attr("height", height)
             .attr("fill", "steelblue")
@@ -229,7 +227,7 @@ class Table {
             else if (d.target.textContent == "Frequency") {
 
                 if (!frequency.sorted) {
-                    this.tableData.sort((a, b) => (a.total > b.total ? 1 : -1))
+                    this.tableData.sort((a, b) => (parseFloat(a.total) > parseFloat(b.total) ? 1 : -1))
                     frequency.ascending = true
                     frequency.sorted = true
                     phrase.sorted = false
@@ -241,11 +239,11 @@ class Table {
                 }
                 else {
                     if (frequency.ascending) {
-                        this.tableData.sort((a, b) => (a.total > b.total ? 1 : -1))
+                        this.tableData.sort((a, b) => (parseFloat(a.total) > parseFloat(b.total) ? 1 : -1))
                         frequency.ascending = false
                     }
                     else {
-                        this.tableData.sort((a, b) => (a.total < b.total ? 1 : -1))
+                        this.tableData.sort((a, b) => (parseFloat(a.total) < parseFloat(b.total) ? 1 : -1))
                         frequency.ascending = true
                     }
                 }
@@ -254,7 +252,7 @@ class Table {
             else if (d.target.textContent == "Percentages") {
 
                 if (!percent.sorted) {
-                    this.tableData.sort((a, b) => (Math.max(parseFloat(a.percent_of_d_speeches), parseFloat(a.percent_of_r_speeches)) > Math.max(parseFloat(b.percent_of_d_speeches), parseFloat(b.percent_of_r_speeches))) ? -1 : 1)
+                    this.tableData.sort((a, b) => (parseFloat(a.percent_of_d_speeches)+parseFloat(a.percent_of_r_speeches) > parseFloat(b.percent_of_d_speeches)+parseFloat(b.percent_of_r_speeches)) ? -1 : 1)
                     percent.ascending = true
                     percent.sorted = true
                     frequency.ascending = false
@@ -264,11 +262,11 @@ class Table {
                 }
                 else {
                     if (percent.ascending) {
-                        this.tableData.sort((a, b) => (Math.max(parseFloat(a.percent_of_d_speeches), parseFloat(a.percent_of_r_speeches)) > Math.max(parseFloat(b.percent_of_d_speeches), parseFloat(b.percent_of_r_speeches))) ? -1 : 1)
+                        this.tableData.sort((a, b) => (parseFloat(a.percent_of_d_speeches)+ parseFloat(a.percent_of_r_speeches) > parseFloat(b.percent_of_d_speeches)+ parseFloat(b.percent_of_r_speeches)) ? -1 : 1)
                         percent.ascending = false
                     }
                     else {
-                        this.tableData.sort((a, b) => (Math.max(parseFloat(a.percent_of_d_speeches), parseFloat(a.percent_of_r_speeches)) < Math.max(parseFloat(b.percent_of_d_speeches), parseFloat(b.percent_of_r_speeches))) ? -1 : 1)
+                        this.tableData.sort((a, b) => (parseFloat(a.percent_of_d_speeches)+parseFloat(a.percent_of_r_speeches) < parseFloat(b.percent_of_d_speeches)+ parseFloat(b.percent_of_r_speeches)) ? -1 : 1)
                         percent.ascending = true
                     }
                 }
