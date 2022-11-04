@@ -18,7 +18,9 @@ class Bubble {
         this.smallVizHeight = 20;
         this.expanding = false;
         this.firstDraw = true;
+        this.brushed = false;
         this.drawChart()
+        
     }
     drawChart(){
         this.drawBubbles()
@@ -41,6 +43,7 @@ class Bubble {
         .range([0, svgWidth])
         .nice();
         
+        this.xScale = xScale
         
         
         // draw the bubble chart
@@ -69,30 +72,33 @@ class Bubble {
             .attr("r", d=> sizeScale(d.total))
             .style("fill",d=>colorScale[category[d.category]])
             .style("stroke","black")
+            .style("z-index",16777271)
             .on('mouseover', (e,i) => {
                 this.drawToolTip(i,xScale)
                 d3.select(e.target).classed('hovered', true)
+                this.brushed = false;
             })
             .on('mouseout', (e,i) =>{
                 d3.select(e.target).classed('hovered', false)
                 d3.select("#toolTip").selectAll("rect").remove()
                 d3.select("#toolTip").selectAll("text").remove()
-            });
+            })
             
         }
         else{
             bubbleChart
-            .join("circle")
             .on('mouseover', (e,i) => {
+                //console.log(e.pageX,e.pageY);
                 this.drawToolTip(i,xScale)
                 d3.select(e.target).classed('hovered', true)
-                
+                this.brushed = false;
             })
             .on('mouseout', (e,i) =>{
                 d3.select(e.target).classed('hovered', false)
                 d3.select("#toolTip").selectAll("rect").remove()
                 d3.select("#toolTip").selectAll("text").remove()
             })
+            .join("circle")
             .transition()
             .duration(1500)
             .attr("cx", d =>{
@@ -115,6 +121,8 @@ class Bubble {
             .attr("r", d=> sizeScale(d.total))
             .style("fill",d=>colorScale[category[d.category]])
             .style("stroke","black")
+            .style("z-index",16777271)
+            
             
         }
         
@@ -176,7 +184,7 @@ class Bubble {
         .append("text")
         .attr("x",svgWidth-160)
         .attr("y",20)
-        .text("Republicain leaning")
+        .text("Republican leaning")
         .style("stroke","black")
 
         // first draw don't draw animation
@@ -209,28 +217,21 @@ class Bubble {
         .text("Grouped by Topic")
         .attr("x",0)
         .attr("y",50)
-
+        this.drawExtreme = false
+        this.storyTelling = false
         document.querySelector('.extreme').onclick=(event)=>{
-            this.showExtreme();}
-        // d3.select("#button")
-        // .append("rect")
-        // .attr("x", 50 )
-        // .attr("y", 25)
-        // .attr("width", 200)
-        // .attr("height", 40)
-        // .style("fill","white")
-        // .style("stroke","blue")
-
-        // d3.select("#button")
-        // .append("text")
-        // .attr("x",90)
-        // .attr("y",50)
-        // .text("Show Extreme")
-        // .style("stroke","blue")
-        // .on("click",(event,d)=>{
-        //     this.showExtreme()
-        // })
-
+                if(this.storyTelling){
+                    this.clearExtreme();
+                    this.storyTelling=!this.storyTelling;
+                }
+                else{
+                    this.showExtreme();
+                    this.storyTelling=!this.storyTelling;
+                    
+                }
+                
+        }
+        
         let temp = null;
         d3.select(".switch")
         .on("click",(event, d)=>{
@@ -295,60 +296,119 @@ class Bubble {
         })
     }
     showExtreme(){
-        console.log("show extreme!")
+        
         let sourceList = this.data.map(v => parseFloat(v.sourceX))
         let max = sourceList.reduce((a, b) => Math.max(a, b), -Infinity);
         let min = sourceList.reduce((a, b) => Math.min(a, b), Infinity);
-        //console.log(min, max)
-        let data = []
-        data.push(this.data.filter(d => (d.sourceX === min || d.sourceX===max)))
-        console.log(data)
 
-        let xgap = 30
-        let ygap = 30
-        d3.select("#extreme").selectAll("rect").remove()
-        d3.select("#extreme").selectAll("text").remove()
-        d3.select("#extreme").selectAll("line").remove()
+        // draw the min extreme
+        let data = []
+        data.push(this.data.filter(d => d.sourceX === min || d.sourceX ===max ))
+
+        let xgap = 0
+        let ygap = 100
 
         let renderData = [
-            (data.position < 0 ? "Democratic speeches mention " : "Republican speeches mention "),
-            data.phrase.charAt(0).toUpperCase() + data.phrase.slice(1),
-            Math.abs(data.position.toFixed(2)) + "%"
+            (data[0][0].position < 0 ? "Democratic speeches mention " : "Republican speeches mention "),
+            data[0][0].phrase.charAt(0).toUpperCase() + data[0][0].phrase.slice(1),
+            Math.abs(data[0][0].position.toFixed(2)) + "%",
+            (data[0][1].position < 0 ? "Democratic speeches mention " : "Republican speeches mention "),
+            data[0][1].phrase.charAt(0).toUpperCase() + data[0][1].phrase.slice(1),
+            Math.abs(data[0][1].position.toFixed(2)) + "%"
         ]
-
-        let xpos = 0;
-        let ypos = 0;
-        if (this.expanding) {
-            xpos = xScale(data.moveX)
-            ypos = xScale(data.moveY + 150)
+        let DrawData = []
+        DrawData.push(data[0][0])
+        DrawData.push(data[0][1])
+        let xpos = [];
+        let ypos = [];
+        
+        DrawData.forEach(d=>{
+            if (this.expanding) {
+                xpos.push(this.xScale(d.moveX)) 
+                ypos.push(this.xScale(d.moveY + 150))
+            }
+            else {
+                xpos.push(this.xScale(d.sourceX))
+                ypos.push(this.xScale(d.sourceY + 150))
+            }
         }
-        else {
-            xpos = xScale(data.sourceX)
-            ypos = xScale(data.sourceY + 150)
-        }
+            
+        )
+        d3.select("#extreme").selectAll("line")
+            .data(xpos)
+            .join("line")
+            .attr("x1", d=>d)
+            .attr("y1", (d,i)=>{
+                return ypos[i]
+            })
+            .attr("x2", d=>d)
+            .attr("y2", (d,i)=>{
+                return ypos[i]+ygap
+            })
+            .style("stroke", "blue")
 
-        d3.select("#extreme").append("rect")
-            .join("rect")
-            .attr("x", xpos + xgap)
-            .attr("y", ypos + ygap)
-            .attr("width", 150)
-            .attr("height", 80)
-            .style("fill", "white")
-            .style("opacity", 0.75)
+        d3.select("#extreme").selectAll("rect")
+        .data(xpos)
+        .join("rect")
+        .attr("x", d=>{
+            if(d<=580){
+                return d
+            }
+            else{
+                return d-300;
+            }
+            })
+        .attr("y", (d,i)=>{
+            return ypos[i] + ygap
+        })
+        .attr("width", 300)
+        .attr("height", 180)
+        .style("fill", "blue")
+        .style("opacity", 0.5)
 
         let text = d3.select("#extreme").selectAll("text").data(renderData)
         text.join("text")
             .text(d => d)
             .attr("x", (d, i) => {
-                if (xpos + xgap <= 580) {
-                    return xpos + xgap;
+                if (i <= 2) {
+                    // draw left
+                    return xpos[0]+10;
                 }
                 else {
-                    return xpos - xgap - 150;
+                    // draw right
+                    return xpos[1]-300+10;
                 }
             })
             .attr("y", (d, i) => {
-                return ypos + ygap * 1.5 + i * 25
+                if(i<=2){
+                    return ypos[0] + ygap*1.3 + i%3 * 50
+                }
+                else{
+                    return ypos[1] + ygap*1.3 + i%3 * 50
+                }
             })
+            .style("font-weight", "bold")
+
+        d3.select("#bubbles").style("opacity",0.5);
+        d3.select("#linesAndAxis").style("opacity",0.5);
+        d3.select("#middleLine").style("opacity",0.5);
+        d3.select("#axis").style("opacity",0.5);
+        d3.select("#category").style("opacity",0.5);
+        d3.select("#toolTip").style("opacity",0.5);
+        d3.select("#NgramTable").style("opacity",0.5);
     }
+    clearExtreme(){
+            d3.select("#extreme").selectAll("rect").remove()
+            d3.select("#extreme").selectAll("text").remove()
+            d3.select("#extreme").selectAll("line").remove()
+            d3.select("#bubbles").style("opacity",1);
+            d3.select("#linesAndAxis").style("opacity",1);
+            d3.select("#middleLine").style("opacity",1);
+            d3.select("#axis").style("opacity",1);
+            d3.select("#category").style("opacity",1);
+            d3.select("#toolTip").style("opacity",1);
+            d3.select("#NgramTable").style("opacity",1);
+          
+    }
+    
 }

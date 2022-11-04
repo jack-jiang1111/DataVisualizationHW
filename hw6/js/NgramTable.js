@@ -239,11 +239,11 @@ class Table {
                 }
                 else {
                     if (frequency.ascending) {
-                        this.tableData.sort((a, b) => (parseFloat(a.total) > parseFloat(b.total) ? 1 : -1))
+                        this.tableData.sort((a, b) => (parseFloat(a.total) < parseFloat(b.total) ? 1 : -1))
                         frequency.ascending = false
                     }
                     else {
-                        this.tableData.sort((a, b) => (parseFloat(a.total) < parseFloat(b.total) ? 1 : -1))
+                        this.tableData.sort((a, b) => (parseFloat(a.total) > parseFloat(b.total) ? 1 : -1))
                         frequency.ascending = true
                     }
                 }
@@ -264,11 +264,11 @@ class Table {
                 }
                 else {
                     if (percent.ascending) {
-                        this.tableData.sort((a, b) => (parseFloat(a.percent_of_d_speeches)+ parseFloat(a.percent_of_r_speeches) > parseFloat(b.percent_of_d_speeches)+ parseFloat(b.percent_of_r_speeches)) ? -1 : 1)
+                        this.tableData.sort((a, b) => (parseFloat(a.percent_of_d_speeches)+ parseFloat(a.percent_of_r_speeches) < parseFloat(b.percent_of_d_speeches)+ parseFloat(b.percent_of_r_speeches)) ? -1 : 1)
                         percent.ascending = false
                     }
                     else {
-                        this.tableData.sort((a, b) => (parseFloat(a.percent_of_d_speeches)+parseFloat(a.percent_of_r_speeches) < parseFloat(b.percent_of_d_speeches)+ parseFloat(b.percent_of_r_speeches)) ? -1 : 1)
+                        this.tableData.sort((a, b) => (parseFloat(a.percent_of_d_speeches)+parseFloat(a.percent_of_r_speeches) > parseFloat(b.percent_of_d_speeches)+ parseFloat(b.percent_of_r_speeches)) ? -1 : 1)
                         percent.ascending = true
                     }
                 }

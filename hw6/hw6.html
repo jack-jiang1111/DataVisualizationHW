@@ -34,6 +34,7 @@
 
         <div id="chart">
             <svg id="bubbleChart" height="1000" width="750">
+                <g id="brush-layer"></g>
                 <g id="bubbles"></g>
                 <g id="linesAndAxis"></g>
                 <g id="middleLine"></g>
@@ -42,7 +43,7 @@
                 <g id="toolTip"></g>
                 <g id="extreme"></g>
             </svg>
-
+            <div>
             <table id="NgramTable" style="width:40%">
                 <thead>
                     <tr id="columnHeaders">
@@ -61,6 +62,7 @@
                 <tbody id="NgramTableBody">
                 </tbody>
             </table>
+            </div>
         </div>
     </div>
     <script src="js/bubbleChart.js"></script>
